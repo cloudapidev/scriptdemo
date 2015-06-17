@@ -1,9 +1,8 @@
 <?php
 cloudlog("test is starting ....");
-
 function entry(){
-	cloudlog("in the entry");
-	
+    cloudlog("in the entry");
+    
 	$text="请按键选择测试功能,向外呼出电话并放广告,请按1;短信发送,请按2;录音,请按3;会议,请按4;播放音频,请按5;呼叫转移,请按6;令人工服务请按0";
 	$params = array("voice"=>"zh","timeout"=>60,"attempts"=>3,"mode"=>"dtmf","interdigitTimeout"=>5,"terminator"=>"#","choices" =>"[1 DIGITS]"," bargein"=>"true");
 	$result = ask($text,$params);
@@ -29,8 +28,7 @@ function entry(){
 		
 		$params = array("voice"=>"zh","timeout"=>60,"attempts"=>3,"mode"=>"dtmf","terminator"=>"#","choices" =>"[13 DIGITS]"," bargein"=>"true");
 		$res = ask("请输入带国家码的短信接收的号码，按#号键结束",$params);
-
-		cloudlog("2----message:the input telnumber is ".$value);
+		cloudlog("2----message:the input telnumber is ".$res->value);
 		
 		message("somebody sends one message to you ",array("to"=>$res->value,"network"=>"SMS","callerID"=>"6582400886"));
 		
@@ -42,14 +40,13 @@ function entry(){
 		
 		$params=array("silenceTimeout"=>10,"maxTime"=>60,"terminator"=>"#","attempts"=>1,"bargein"=>"true","beep"=>"true","timeout"=>15,"voice"=>"en","onError"=>"isError","onEvent"=>"isEvent","onHangup"=>"isHangup","onTimeout"=>"isTimeout");
 		record("recording will start",$params);
-
 		cloudlog("3----record end");		
 	}
 	elseif($value == 4)//会议conference
 	{
 		cloudlog("4----conference");
 		
-		$res=ask("please three numbers as the room ,exit the conference;",array("bargein"=>"true","choices"=>"[3 DIGITS]","interdigitTimeout"=>5,"attempts"=>2,"mode"=>"dtmf"));
+		$res=ask("please three numbers as the room, exit conference please press *",array("bargein"=>"true","choices"=>"[3 DIGITS]","interdigitTimeout"=>5,"attempts"=>2,"mode"=>"dtmf"));
 		$value=$res->value;
 		
 		cloudlog("4----conference:the input number is ".$value);
@@ -95,85 +92,84 @@ function entry(){
 		say("sorry,the number you entered is false");	
 	}
 }
-
 function conChoice($event)
 {
-	cloudlog("in the conChoice,the event is ".json_encode($event));
+	cloudlog("in the conChoice");
 	say("you exit the conference.");
 }
 function isError($event)
 {
-	cloudlog("in the isError,the event is ".json_encode($event));
+	cloudlog("in the isError");
 	say("the system is error ,please try it again later.");
 }
 function isBusy($event)
 {
-	cloudlog("in the isBusy,the event is ".json_encode($event));
+	cloudlog("in the isBusy");
 	say("the user is busy,please try it again later.");
 }
 function isFailure($event)
 {
-	cloudlog("in the isFailure,the event is ".json_encode($event));
+	cloudlog("in the isFailure");
 	say("the call is Failure,please try it again later.");
 }
 function isTimeout($event)
 {
-	cloudlog("in the isTimeout,the event is ".json_encode($event));
+	cloudlog("in the isTimeout");
 	say("the call isTimeout ,please try it again later.");
 }
 function isHangup($event)
 {
-	cloudlog("in the isHangup,the event is ".json_encode($event));
+	cloudlog("in the isHangup");
 	say("somebody has hangup,and exit.");
 }
 function isEvent($event)
 {
-	cloudlog("in the isEvent,the event is ".json_encode($event));
+	cloudlog("in the isEvent");
 	say("a event fires...");
 }
 function isCallFailure($event)
 {
-	cloudlog("in the isCallFailure,the event is ".json_encode($event));
+	cloudlog("in the isCallFailure");
 	say("the call is failure.");
 }
 function isSuccess($event)
 {
-	cloudlog("in the isSuccess,the event is ".json_encode($event));
+	cloudlog("in the isSuccess");
 	say("call is success");
 }
 function isBadeChoice($event)
 {
-	cloudlog("in the isBadeChoice,the event is ".json_encode($event));
+	cloudlog("in the isBadeChoice");
 	say("is badeChoice...");
 }
 function isChoice($event)
 {
-	cloudlog("in the isChoice,the event is ".json_encode($event));
+	cloudlog("in the isChoice");
 	say("is isChoice...");
 }
 function isConnect($event)
 {
-	cloudlog("in the isConnect ,the event is ".json_encode($event));
+	cloudlog("in the isConnect");
 	say("the call is connect ,please hold on");
 }
 
 do
 {
-	$exit=true;
+	$flag=false;
 	entry();
 	
-	$params = array("voice"=>"zh","timeout"=>10.0,"attempts"=>3,"mode"=>"dtmf","interdigitTimeout"=>5,"terminator"=>"#","choices" =>"[1 DIGITS]"," bargein"=>"true");
-	$result=ask("回到主菜单,请按1",$params);
+	$params = array("voice"=>"zh","timeout"=>30,"attempts"=>3,"mode"=>"dtmf","interdigitTimeout"=>5,"terminator"=>"#","choices" =>"[1 DIGITS]"," bargein"=>"true");
+	$result = ask("回到主菜单,请按1",$params);
+    cloudlog("back to menu, value ".$result->value);
 	if($result->value == 1 )
 	{
-		$exit=false;
+		$flag=true;
 	}
 	else
 	{
 		say("sorry ,the number you enter is false.Thank for your calling,see you");
 		hangup();
 	}
-}while($exit)
-
+}while($flag)
 cloudlog("end....");
 ?>

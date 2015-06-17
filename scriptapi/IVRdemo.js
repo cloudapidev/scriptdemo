@@ -10,16 +10,16 @@ function entry(){
 	{
 		cloudlog("1----call");
 		
-		var res = ask("请输入带国家码的呼出号码", array("voice":"zh","choices":"[8-13 DIGITS]","timeout":30, "attempts":3, "terminator":"#", "bargein":"true"));
+		var res = ask("请输入带国家码的呼出号码", {"voice":"zh","choices":"[8-13 DIGITS]","timeout":30, "attempts":3, "terminator":"#", "bargein":"true"});
 		var params = {value:"这是一段来自10086的中文广告",voice:"zh",timeout:30,callerID:"10086",onBusy:isBusy,onCallFailure:isFailure,onError:isError,onTimeout:isTimeout};
 		
-		cloudlog("1----:the input telnumber is ".$res->value);
+		cloudlog("1----:the input telnumber is " + res.value.toString());
 		
 		call("tel:" + res.value.toString(),params);
 		
 		cloudlog("1----call end");
 	}
-	elseif(value == 2)//短信发送message
+	else if(value == 2)//短信发送message
 	{
 		cloudlog("2----message");
 		
@@ -28,11 +28,11 @@ function entry(){
 
 		cloudlog("2----message:the input telnumber is " + value.toString());
 		
-		message("somebody sends one message to you ",{to:res.value.toString(),network:"SMS",callerID:"6582400886"));
+		message("somebody sends one message to you ",{to:res.value.toString(),network:"SMS",callerID:"6582400886"});
 		
 		cloudlog("2----message end");
 	}
-	elseif($value == 3)//录音record
+	else if($value == 3)//录音record
 	{
 		cloudlog("3----record");
 		
@@ -41,7 +41,7 @@ function entry(){
 
 		cloudlog("3----record end");		
 	}
-	elseif($value == 4)//会议conference
+	else if($value == 4)//会议conference
 	{
 		cloudlog("4----conference");
 		
@@ -50,12 +50,12 @@ function entry(){
 		
 		cloudlog("4----conference:the input number is " + value.toString());
 		
-		var params = {terminator:"*",joinPrompt:"true",leavePrompt:"true",onError:isError,onChoice:conChoice,onTimeout:isTimeout,onHangup:isHangup);
+		var params = {terminator:"*",joinPrompt:"true",leavePrompt:"true",onError:isError,onChoice:conChoice,onTimeout:isTimeout,onHangup:isHangup};
 		conference(value,params);
 		
 		cloudlog("4----conference end");
 	}
-	elseif($value == 5)//等待5秒后放音say,wait,hangup
+	else if($value == 5)//等待5秒后放音say,wait,hangup
 	{
 		cloudlog("5----wait,say");
 		
@@ -67,21 +67,21 @@ function entry(){
 		
 		cloudlog("5----wait,say end");
 	}
-	elseif($value == 6)//呼叫转移
+	else if($value == 6)//呼叫转移
 	{
 		cloudlog("6----transfer");
 		
 		var res = ask("请输入带国家码的呼叫转移号码", {voice:"zh",choices:"[8-13 DIGITS]",timeout:30,attempts:3,terminator:"#",bargein:"true"});
-		var params = {timeout:30,onTimeout:isTimeout,onCallFailure:isCallFailure,onError:isError,onSuccess:isSuccess);
+		var params = {timeout:30,onTimeout:isTimeout,onCallFailure:isCallFailure,onError:isError,onSuccess:isSuccess};
 		transfer("tel:" + res.value.toString(),params);
 		
 		cloudlog("6----transfer end");
 	}
-	elseif($value == 0)//人工服务
+	else if($value == 0)//人工服务
 	{
 		cloudlog("6----manual work");
 		
-		var params = {timeout:30,onTimeout:isTimeout,onCallFailure:isCallFailure,onError:isError,onSuccess:isSuccess);
+		var params = {timeout:30,onTimeout:isTimeout,onCallFailure:isCallFailure,onError:isError,onSuccess:isSuccess};
 		transfer("sip:maji@caas.grcaassip.com",params);
 		
 		cloudlog("6----manual work end");
@@ -92,81 +92,81 @@ function entry(){
 	}
 }
 
-conChoice = function($event)
+conChoice = function(event)
 {
-	cloudlog("in the conChoice,the event is ".json_encode($event));
+	cloudlog("in the conChoice");
 	say("you exit the conference.");
 }
-isError = function($event)
+isError = function(event)
 {
-	cloudlog("in the isError,the event is ".json_encode($event));
+	cloudlog("in the isError");
 	say("the system is error ,please try it again later.");
 }
-isBusy = function($event)
+isBusy = function(event)
 {
-	cloudlog("in the isBusy,the event is ".json_encode($event));
+	cloudlog("in the isBusy");
 	say("the user is busy,please try it again later.");
 }
-function isFailure($event)
+function isFailure(event)
 {
-	cloudlog("in the isFailure,the event is ".json_encode($event));
+	cloudlog("in the isFailure");
 	say("the call is Failure,please try it again later.");
 }
-isTimeout = function($event)
+isTimeout = function(event)
 {
-	cloudlog("in the isTimeout,the event is ".json_encode($event));
+	cloudlog("in the isTimeout");
 	say("the call isTimeout ,please try it again later.");
 }
-isHangup = function($event)
+isHangup = function(event)
 {
-	cloudlog("in the isHangup,the event is ".json_encode($event));
+	cloudlog("in the isHangup");
 	say("somebody has hangup,and exit.");
 }
-isEvent = function($event)
+isEvent = function(event)
 {
-	cloudlog("in the isEvent,the event is ".json_encode($event));
+	cloudlog("in the isEvent");
 	say("a event fires...");
 }
-isCallFailure = function($event)
+isCallFailure = function(event)
 {
-	cloudlog("in the isCallFailure,the event is ".json_encode($event));
+	cloudlog("in the isCallFailure");
 	say("the call is failure.");
 }
-isSuccess = function($event)
+isSuccess = function(event)
 {
-	cloudlog("in the isSuccess,the event is ".json_encode($event));
+	cloudlog("in the isSuccess");
 	say("call is success");
 }
-isBadeChoice = function($event)
+isBadeChoice = function(event)
 {
-	cloudlog("in the isBadeChoice,the event is ".json_encode($event));
+	cloudlog("in the isBadeChoice");
 	say("is badeChoice...");
 }
-isChoice = function($event)
+isChoice = function(event)
 {
-	cloudlog("in the isChoice,the event is ".json_encode($event));
+	cloudlog("in the isChoice");
 	say("is isChoice...");
 }
-isConnect = function($event)
+isConnect = function(event)
 {
-	cloudlog("in the isConnect ,the event is ".json_encode($event));
+	cloudlog("in the isConnect");
 	say("the call is connect ,please hold on");
 }
 
 do
 {
-	var exit=true;
+	var flag=false;
 	entry();
 	
-	var params = array("voice":"zh","timeout":10.0,"attempts":3,"mode":"dtmf","interdigitTimeout":5,"terminator":"#","choices" :"[1 DIGITS]"," bargein":"true");
-	var result=ask("回到主菜单,请按1",$params);
+	var params = {"voice":"zh","timeout":10.0,"attempts":3,"mode":"dtmf","interdigitTimeout":5,"terminator":"#","choices" :"[1 DIGITS]"," bargein":"true"};
+	var result=ask("回到主菜单,请按1",params);
 	if(result.value == 1 )
 	{
-		exit=false;
+		flag=true;
 	}
 	else
 	{
 		say("sorry ,the number you enter is false.Thank for your calling,see you");
 		hangup();
 	}
-}while(exit)
+}while(flag);
