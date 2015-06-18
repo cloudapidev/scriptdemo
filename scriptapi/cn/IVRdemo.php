@@ -12,14 +12,14 @@ function entry(){
 	if($value == 1)//呼出电话并播放广告
 	{
 		cloudlog("1----call");
-		
+
 		$res = ask("请输入带国家码的呼出号码", array("voice"=>"zh","choices"=>"[8-13 DIGITS]","timeout"=>30, "attempts"=>3, "terminator"=>"#", "bargein"=>"true"));
 		$params = array("value"=>"这是一段来自10086的中文广告","voice"=>"zh","timeout"=>30,"callerID"=>"10086","onBusy"=>"isBusy","onCallFailure"=>"isFailure","onError"=>"isError","onTimeout"=>"isTimeout");
-		
+
 		cloudlog("1----:the input telnumber is ".$res->value);
-		
+
 		call("tel:".$res->value,$params);
-		
+
 		cloudlog("1----call end");
 	}
 	elseif($value == 2)//短信发送message
