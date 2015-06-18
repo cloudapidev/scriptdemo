@@ -1,17 +1,17 @@
 <?php
 /**
-call out and play a advertise   -----press one
-send message 				    -----press two
-record 						    -----press three
-join conference 			    -----press four
-wait for 5s and say			    -----press five
-transfer					    -----press six
-manual work 				    -----press zero
+* ivr menu:
+*   1: call out and play a advertise  
+*   2: send sms message 				  
+*   3: record voice						     
+*   4: join conference 			    
+*   5: wait for 5s and say			 
+*   6: transfer	to pstn number				     		     
 */
 
 function entry(){
     cloudlog("in the entry");    
-	$text="Please choose number to test the function:calling out and playing a advertise,press one ;sending message ,press two;recording,press three;joining conference ,press four;playing a audio,press five;transfering,press six;Artificial service,press zero";
+	$text="Welcome to Tela. calling out and playing a advertise,press one ;sending message ,press two;recording,press three;joining conference ,press four;playing a audio,press five;transfering,press six";
 	$params = array("voice"=>"en","timeout"=>60,"attempts"=>3,"mode"=>"dtmf","interdigitTimeout"=>5,"terminator"=>"#","choices" =>"[1 DIGITS]"," bargein"=>"true");
 	$result = ask($text,$params);
 	$value=$result->value;
@@ -20,7 +20,7 @@ function entry(){
 	if($value == 1)//calling out and playing a advertise
 	{
 		cloudlog("in the calling");		
-		$res = ask("Please enter the target phone  number with country code", array("voice"=>"en","choices"=>"[8-13 DIGITS]","timeout"=>30, "attempts"=>3, "terminator"=>"#", "bargein"=>"true"));
+		$res = ask("Please enter the calling number with country code", array("voice"=>"en","choices"=>"[8-13 DIGITS]","timeout"=>30, "attempts"=>3, "terminator"=>"#", "bargein"=>"true"));
 		$params = array("value"=>"This is a Chinese advertising from 10086","voice"=>"en","timeout"=>30,"callerID"=>"10086","onBusy"=>"isBusy","onCallFailure"=>"isFailure","onError"=>"isError","onTimeout"=>"isTimeout");
 		
 		cloudlog("the input telnumber is ".$res->value);
@@ -33,7 +33,7 @@ function entry(){
 	{
 		cloudlog("in the message");		
 		$params = array("voice"=>"en","timeout"=>60,"attempts"=>3,"mode"=>"dtmf","terminator"=>"#","choices" =>"[13 DIGITS]"," bargein"=>"true");
-		$res = ask("Please enter the phone number which receives the message  with country code, press the # key to end",$params);
+		$res = ask("Please enter the phone number which receives the message with country code, press the # key to end",$params);
 		cloudlog("the input telnumber is ".$res->value);		
 		message("somebody sends one message to you ",array("to"=>$res->value,"network"=>"SMS","callerID"=>"6582400886"));		
 		cloudlog("sending message ends");
@@ -50,11 +50,12 @@ function entry(){
 	{
 		cloudlog("in the conference");
 		
-		$res=ask("Please enter the three-digit room number, exit the conference please press *",array("bargein"=>"true","choices"=>"[3 DIGITS]","interdigitTimeout"=>5,"attempts"=>2,"mode"=>"dtmf"));
+		$res=ask("Please enter the three-digit room number, press star to exit conference room",array("bargein"=>"true","choices"=>"[3 DIGITS]","interdigitTimeout"=>5,"attempts"=>2,"mode"=>"dtmf"));
 		$value=$res->value;		
 		cloudlog("the input number is ".$value);
 		if(is_numeric($value) &&¡¡$value > 99 && $value < 1000)
 		{
+			say("you will enter in conference room ".$value);
 			$params=array("terminator"=>"*","joinPrompt"=>"true","leavePrompt"=>"true","onError"=>"isError","onChoice"=>"conChoice","onTimeout"=>"isTimeout","onHangup"=>"isHangup");
 			conference($value,$params);			
 			cloudlog("conference ends");			
@@ -68,7 +69,7 @@ function entry(){
 	{
 		cloudlog("int the wait");
 		
-		say(" playing a audio after waiting for 5s, and then hanging up");
+		say(" playing a audio after waiting for five second, and then hanging up");
 		wait(5000);
 		cloudlog("after the wait...and  say start");
 		say("Thank you for calling, please call again, goodbye");
@@ -81,6 +82,7 @@ function entry(){
 		
 		$res = ask("Please enter the transfering phone number with country code", array("voice"=>"en","choices"=>"[8-13 DIGITS]","timeout"=>30, "attempts"=>3, "terminator"=>"#", "bargein"=>"true"));
 		$params=array('timeout'=>30,"onTimeout"=>"isTimeout","onCallFailure"=>"isCallFailure","onError"=>"isError","onSuccess"=>"isSuccess");
+		say("you will be transfer to number ".$value);
 		transfer("tel:".$res->value,$params);		
 		cloudlog("transfering  ends");
 	}
