@@ -8,7 +8,6 @@
 *   5: wait for 5s and say			 
 *   6: transfer	to pstn number				     		     
 */
-
 function entry(){
     _log("in the entry");    
 	$text="Welcome to Tela. calling out and playing a advertise,press one ;sending message ,press two;recording,press three;joining conference ,press four;playing a audio,press five;transfering,press six";
@@ -56,7 +55,7 @@ function entry(){
 		if(is_numeric($value) && $value > 99 && $value < 1000)
 		{
 			say("you will enter in conference room ".$value);
-			$params=array("terminator"=>"*","joinPrompt"=>"true","leavePrompt"=>"true","onError"=>"isError","onChoice"=>"conChoice","onTimeout"=>"isTimeout","onHangup"=>"isHangup","playTones"=true);
+			$params=array("terminator"=>"*","joinPrompt"=>"true","leavePrompt"=>"true","onError"=>"isError","onChoice"=>"conChoice","onTimeout"=>"isTimeout","onHangup"=>"isHangup","playTones"=>'true');
 			conference($value,$params);			
 			_log("conference ends");			
 		}
@@ -173,8 +172,7 @@ function isConnect($event)
 }
 
 _log("test is starting ....");
-do
-{
+do{
 	$flag=false;
 	entry();	
 	$params = array("voice"=>"en","timeout"=>30,"attempts"=>3,"mode"=>"dtmf","interdigitTimeout"=>5,"terminator"=>"#","choices" =>"[1 DIGITS]"," bargein"=>"true");
@@ -189,6 +187,6 @@ do
 		say("sorry ,the number you entered is incorrect.Thank for calling,Bye");
 		hangup();
 	}
-}while($flag)
+}while($flag);
 _log("test has ended....");
 ?>
