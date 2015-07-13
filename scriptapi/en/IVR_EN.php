@@ -35,7 +35,7 @@ function entry(){
 		$params = array("voice"=>"en","timeout"=>60,"attempts"=>3,"mode"=>"dtmf","terminator"=>"#","choices" =>"[13 DIGITS]"," bargein"=>"true");
 		$res = ask("Please enter the phone number which receives the message with country code, press the # key to end",$params);
 		cloudlog("the input telnumber is ".$res->value);		
-		message("somebody sends one message to you ",array("to"=>$res->value,"network"=>"SMS","callerID"=>"6582400886"));		
+		message("somebody sends one message to you ",array("to"=>$res->value,"network"=>"SMS","callerID"=>"6582400883"));		
 		cloudlog("sending message ends");
 	}
 	elseif($value == 3)//record
@@ -177,6 +177,6 @@ do
 		say("sorry ,the number you entered is incorrect.Thank for calling,Bye");
 		hangup();
 	}
-}while($flag)
+}while($flag);
 cloudlog("test has ended....");
 ?>
