@@ -86,14 +86,6 @@ function entry(){
 		transfer("tel:".$res->value,$params);		
 		cloudlog("transfering  ends");
 	}
-	elseif($value == 0)//manual work
-	{
-		cloudlog("manual work");
-		
-		$params=array('timeout'=>30,"onTimeout"=>"isTimeout","onCallFailure"=>"isCallFailure","onError"=>"isError","onSuccess"=>"isSuccess");
-		transfer("sip:maji@caas.grcaassip.com",$params);		
-		cloudlog("manual work ends");
-	}
 	else
 	{
 		say("sorry,the number you entered is incorrect");	
