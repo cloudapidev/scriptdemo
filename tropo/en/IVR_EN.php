@@ -11,7 +11,7 @@
 function entry(){
     _log("in the entry");    
 	$text="Welcome to Tela. calling out and playing a advertise,press one ;sending message ,press two;recording,press three;joining conference ,press four;playing a audio,press five;transfering,press six";
-	$params = array("voice"=>"en","timeout"=>60,"attempts"=>3,"mode"=>"dtmf","interdigitTimeout"=>5,"terminator"=>"#","choices" =>"[1 DIGITS]"," bargein"=>"true","onBadChoice"=>"onBadChoice");
+	$params = array("timeout"=>60,"attempts"=>3,"mode"=>"dtmf","interdigitTimeout"=>5,"terminator"=>"#","choices" =>"[1 DIGITS]"," bargein"=>"true","onBadChoice"=>"onBadChoice");
 	$result = ask($text,$params);
 	$value=$result->value;
 	_log("the first input value is ".$value);
@@ -19,29 +19,29 @@ function entry(){
 	if($value == 1)//calling out and playing a advertise
 	{
 		_log("in the calling");		
-		$res = ask("Please enter the calling number with country code", array("voice"=>"en","choices"=>"[8-13 DIGITS]","timeout"=>30, "attempts"=>3, "terminator"=>"#", "bargein"=>"true","onBadChoice"=>"onBadChoice"));
-		$params = array("value"=>"This is a Chinese advertising from 10086","voice"=>"en","timeout"=>30,"callerID"=>"10086","onBusy"=>"isBusy","onCallFailure"=>"isFailure","onError"=>"isError","onTimeout"=>"isTimeout");
+		$res = ask("Please enter the calling number with country code", array("choices"=>"[8-13 DIGITS]","timeout"=>30, "attempts"=>3, "terminator"=>"#", "bargein"=>"true","onBadChoice"=>"onBadChoice"));
+		$params = array("timeout"=>60,"onBusy"=>"isBusy","onCallFailure"=>"isFailure","onError"=>"isError","onTimeout"=>"isTimeout");
 		
 		_log("the input telnumber is ".$res->value);
 		
-		call("tel:+".$res->value,$params);
+		call("+".$res->value,$params);
 		
 		_log("calling  ends....");
 	}
 	elseif($value == 2)//send message
 	{
 		_log("in the message");		
-		$params = array("voice"=>"en","timeout"=>60,"attempts"=>3,"mode"=>"dtmf","terminator"=>"#","choices" =>"[13 DIGITS]"," bargein"=>"true","onBadChoice"=>"onBadChoice");
+		$params = array("timeout"=>60,"attempts"=>3,"mode"=>"dtmf","terminator"=>"#","choices" =>"[13 DIGITS]"," bargein"=>"true","onBadChoice"=>"onBadChoice");
 		$res = ask("Please enter the phone number which receives the message with country code, press the # key to end",$params);
 		_log("the input telnumber is ".$res->value);		
-		message("somebody sends one message to you ",array("to"=>$res->value,"network"=>"SMS","callerID"=>"6582400886"));		
+		message("somebody sends a message to you ",array("to"=>$res->value,"network"=>"SMS"));		
 		_log("sending message ends");
 	}
 	elseif($value == 3)//record
 	{
 		_log("int the record");
 		
-		$params=array("silenceTimeout"=>10,"maxTime"=>60,"terminator"=>"#","attempts"=>1,"bargein"=>"true","beep"=>"true","timeout"=>15,"voice"=>"en","onError"=>"isError","onEvent"=>"isEvent","onHangup"=>"isHangup","onTimeout"=>"isTimeout");
+		$params=array("silenceTimeout"=>10,"maxTime"=>60,"terminator"=>"#","attempts"=>1,"bargein"=>"true","beep"=>"true","transcriptionOutURI" => "mailto:935679913@qq.com","timeout"=>15,"onError"=>"isError","onEvent"=>"isEvent","onHangup"=>"isHangup","onTimeout"=>"isTimeout");
 		record("recording will start",$params);
 		_log("record ends");		
 	}
@@ -55,7 +55,7 @@ function entry(){
 		if(is_numeric($value) && $value > 99 && $value < 1000)
 		{
 			say("you will enter in conference room ".$value);
-			$params=array("terminator"=>"*","joinPrompt"=>"true","leavePrompt"=>"true","onError"=>"isError","onChoice"=>"conChoice","onTimeout"=>"isTimeout","onHangup"=>"isHangup","playTones"=>'true');
+			$params=array("terminator"=>"#","playTones"=>"true","joinPrompt"=>"true","leavePrompt"=>"true","onError"=>"isError","onChoice"=>"conChoice","onHangup"=>"isHangup");
 			conference($value,$params);			
 			_log("conference ends");			
 		}
@@ -79,10 +79,10 @@ function entry(){
 	{
 		_log("6----transfer");
 		
-		$res = ask("Please enter the transfering phone number with country code", array("voice"=>"en","choices"=>"[8-13 DIGITS]","timeout"=>30, "attempts"=>3, "terminator"=>"#", "bargein"=>"true","onBadChoice"=>"onBadChoice"));
-		$params=array('timeout'=>30,"onTimeout"=>"isTimeout","onCallFailure"=>"isCallFailure","onError"=>"isError","onSuccess"=>"isSuccess","onConnect"=>"screen");
+		$res = ask("Please enter the transfering phone number with country code", array("choices"=>"[8-13 DIGITS]","timeout"=>30, "attempts"=>3, "terminator"=>"#", "bargein"=>"true","onBadChoice"=>"onBadChoice"));
+		$params=array('timeout'=>30,"onTimeout"=>"isTimeout","onCallFailure"=>"isCallFailure","onError"=>"isError","onSuccess"=>"isSuccess");
 		say("you will be transfer to number ".$value);
-		transfer("tel:".$res->value,$params);		
+		transfer("+".$res->value,$params);		
 		_log("transfering  ends");
 	}
 	else
@@ -90,21 +90,6 @@ function entry(){
 		say("sorry,the number you entered is incorrect");	
 	}
 }
-
-function screen($event)
-{
-	$result = ask("Press 1 to accept the call, press any other key to reject.", array(
-	        "choices" => "1",
-	        "mode" => "dtmf"
-	    ));
-	    if ($result->name == "choice") {
-	        say("Connecting you now.");
-	    } else {
-	        say("Rejecting the call. Goodbye.");
-	        hangup();
-	    }
-}
-
 function onBadChoice($event)
 {
 	_log("in the onBadChoice");
@@ -172,10 +157,13 @@ function isConnect($event)
 }
 
 _log("test is starting ....");
+
 do{
 	$flag=false;
+	say("hello,welcome to tropo2");
 	entry();	
-	$params = array("voice"=>"en","timeout"=>30,"attempts"=>3,"mode"=>"dtmf","interdigitTimeout"=>5,"terminator"=>"#","choices" =>"[1 DIGITS]"," bargein"=>"true");
+	say("hello,welcome to tropo3");
+	$params = array("timeout"=>30,"attempts"=>3,"mode"=>"dtmf","interdigitTimeout"=>5,"terminator"=>"#","choices" =>"[1 DIGITS]"," bargein"=>"true");
 	$result = ask("Return to the main menu,please press one",$params);
     _log("Return to the  main menu,the input is :".$result->value);
 	if($result->value == 1 )

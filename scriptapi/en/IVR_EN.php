@@ -56,7 +56,7 @@ function entry(){
 		if(is_numeric($value) && $value > 99 && $value < 1000)
 		{
 			say("you will enter in conference room ".$value);
-			$params=array("terminator"=>"*","joinPrompt"=>"true","leavePrompt"=>"true","onError"=>"isError","onChoice"=>"conChoice","onTimeout"=>"isTimeout","onHangup"=>"isHangup");
+			$params=array("terminator"=>"*","playTones"=>"true","joinPrompt"=>"true","leavePrompt"=>"true","onError"=>"isError","onChoice"=>"conChoice","onTimeout"=>"isTimeout","onHangup"=>"isHangup");
 			conference($value,$params);			
 			cloudlog("conference ends");			
 		}
