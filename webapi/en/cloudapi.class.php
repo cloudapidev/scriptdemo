@@ -17,7 +17,7 @@ class Cloudapi extends BaseClass {
     $this->_language = $language;
   }
 
-  public function askSer($ask, Array $params=NULL) {
+  public function ask($ask, Array $params=NULL) {
     if(!is_object($ask)) {
       $p = array('as','event','voice','attempts', 'bargein', 'minConfidence', 'name', 'required', 'timeout', 'allowSignals', 'recognizer', 'interdigitTimeout', 'sensitivity', 'speechCompleteTimeout', 'speechIncompleteTimeout','mode');
       foreach ($p as $option) {
@@ -46,7 +46,7 @@ class Cloudapi extends BaseClass {
     $this->ask = sprintf('%s', $ask);
   }
 
-  public function callSer($call, Array $params=NULL) {
+  public function call($call, Array $params=NULL) {
     if(!is_object($call)) {
       $p = array('to', 'from', 'network', 'channel', 'answerOnMedia', 'timeout', 'headers', 'recording', 'allowSignals', 'machineDetection', 'voice','name','attempts','say');
       foreach ($p as $option) {
@@ -64,7 +64,7 @@ class Cloudapi extends BaseClass {
     $this->call = sprintf('%s', $call);
   }
 
-  public function conferenceSer($conference, Array $params=NULL) {
+  public function conference($conference, Array $params=NULL) {
     if(!is_object($conference)) {
       $p = array('name', 'id', 'mute', 'on', 'playTones', 'required', 'terminator', 'allowSignals', 'interdigitTimeout', 'joinPrompt', 'leavePrompt', 'voice');
       foreach ($p as $option) {
@@ -83,12 +83,12 @@ class Cloudapi extends BaseClass {
     $this->conference = sprintf('%s', $conference);
   }
 
-  public function hangupSer() {
+  public function hangup() {
     $hangup = new Hangup();
     $this->hangup = sprintf('%s', $hangup);
   }
 
-  public function messageSer($message, Array $params=null) {
+  public function message($message, Array $params=null) {
     if(!is_object($message)) {
       $say = new Say($message);
       $to = $params["to"];
@@ -117,7 +117,7 @@ class Cloudapi extends BaseClass {
     }
     $this->on = array(sprintf('%s', $on));
   }
-  public function recordSer($record) {
+  public function record($record) {
     if(!is_object($record) && is_array($record)) {
       $params = $record;
       $p = array('as', 'voice', 'emailFormat', 'transcription', 'terminator');
@@ -157,7 +157,7 @@ class Cloudapi extends BaseClass {
     }
     $this->record = sprintf('%s', $record);
   }
-  public function redirectSer($redirect, Array $params=NULL) {
+  public function redirect($redirect, Array $params=NULL) {
     if(!is_object($redirect)) {
       $to = isset($params["to"]) ? $params["to"]: null;
       $from = isset($params["from"]) ? $params["from"] : null;
@@ -167,12 +167,12 @@ class Cloudapi extends BaseClass {
     }
     $this->redirect = sprintf('%s', $redirect);
   }
-  public function rejectSer() {
-    $reject = new reject();
+  public function reject() {
+    $reject = new Reject();
     $this->reject = sprintf('%s', $reject);
   }
 
-  public function saySer($say, Array $params=NULL) {
+  public function say($say, Array $params=NULL) {
     if(!is_object($say)) {
       $p = array('as', 'format', 'event','voice', 'allowSignals','attempts','name','terminator');
       $value = $say;
@@ -188,7 +188,7 @@ class Cloudapi extends BaseClass {
     $this->say = array(sprintf('%s', $say));
   }
   
-  public function cloudlogSer($logcontent, Array $params=NULL) {
+  public function cloudlog($logcontent, Array $params=NULL) {
     if(!is_object($logcontent)) {
       $p = array('level');
       foreach ($p as $option) {
@@ -202,7 +202,7 @@ class Cloudapi extends BaseClass {
     $this->cloudlog = array(sprintf('%s', $logcontent));
   }
 
-  public function startRecordingSer($startRecording) {
+  public function startRecording($startRecording) {
     if(!is_object($startRecording) && is_array($startRecording)) {
       $params = $startRecording;
       $p = array('format', 'method', 'password', 'url', 'username', 'transcriptionID', 'transcriptionEmailFormat', 'transcriptionOutURI');
@@ -217,12 +217,12 @@ class Cloudapi extends BaseClass {
     $this->startRecording = sprintf('%s', $startRecording);
   }
 
-  public function stopRecordingSer() {
-    $stopRecording = new StopRecording();
-    $this->StopRecording = sprintf('%s', $stopRecording);
+  public function stopRecording() {
+    $stopRecording = new stopRecording();
+    $this->stopRecording = sprintf('%s', $stopRecording);
   }
 
-  public function transferSer($transfer, Array $params=NULL) {
+  public function transfer($transfer, Array $params=NULL) {
     if(!is_object($transfer)) {
       $choices = isset($params["choices"]) ? $params["choices"] : null;
       $choices = isset($params["terminator"])
@@ -286,7 +286,7 @@ class Cloudapi extends BaseClass {
     $this->transfer = sprintf('%s', $transfer);
   }
   
-  public function waitSer($wait) {
+  public function wait($wait) {
      if (!is_object($wait) && is_array($wait)){
         $params = $wait;
         $signal = isset($params['allowSignals']) ? $params['allowSignals'] : null;
