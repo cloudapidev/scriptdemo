@@ -40,7 +40,7 @@ class Cloudapi extends BaseClass {
       if (!isset($voice) && isset($this->_voice)) {
         $voice = $this->_voice;
       }
-      $choices = isset($params["choices"]) ? new Choices($params["choices"], $params["mode"], $params["terminator"],$params['interdigitTimeout']) : null;
+      $choices = isset($params["choices"]) ? new Choices($params["choices"], $params["mode"], $params["terminator"],$interdigitTimeout) : null;
       $ask = new Ask($attempts, $bargein, $choices, $minConfidence, $name, $required, $say, $timeout, $voice, $allowSignals, $recognizer, $interdigitTimeout, $sensitivity, $speechCompleteTimeout, $speechIncompleteTimeout,$mode);
     }
     $this->ask = sprintf('%s', $ask);
@@ -133,7 +133,11 @@ class Cloudapi extends BaseClass {
       if (!isset($params['voice'])) {
         $params['voice'] = $this->_voice;
       }
-      $say = new Say($params["say"], $params["as"], null, null);
+	  if (isset($params['say']) && isset($params['as'])) {
+		$say = new Say($params["say"], $params["as"], null, null);
+	  } else {
+		$say = null;
+	  }
       if (is_array($params['transcription'])) {
         $p = array('url', 'id', 'emailFormat');
         foreach ($p as $option) {
@@ -978,12 +982,13 @@ class Reject extends EmptyBaseClass { }
 class Result {
 
   private $_sessionId;
-  private $_callId;
   private $_state;
   private $_sessionDuration;
   private $_sequence;
-  private $_complete;
   private $_error;
+  private $_calledId;
+  private $_duration;
+  private $_connectedDuration;
   private $_actions;
   private $_name;
   private $_attempts;
@@ -1015,14 +1020,13 @@ class Result {
       throw new CloudapiException('Not a result object.');
     }
     $this->_sessionId = $result->result->sessionId;
-    
-    $this->_callId = isset($result->result->callId)?$result->result->callId:null;
     $this->_state = $result->result->state;
-    
     $this->_sessionDuration = $result->result->sessionDuration;
     $this->_sequence = $result->result->sequence;
-    $this->_complete = $result->result->complete;
     $this->_error = $result->result->error;
+    $this->_calledId = $result->result->CalledID;
+    $this->_duration = $result->result->duration;
+    $this->_connectedDuration = $result->result->connectedDuration;
     $this->_userType = isset($result->result->userType)?$result->result->userType:null;
     $this->_actions = $result->result->actions;
     $this->_name = isset($result->result->actions->name)?$result->result->actions->name:null;
@@ -1040,10 +1044,6 @@ class Result {
     return $this->_sessionId;
   }
 
-  public function getCallId() {
-    return $this->_callId;
-  }
-
   public function getState() {
     return $this->_state;
   }
@@ -1056,12 +1056,20 @@ class Result {
     return $this->_sequence;
   }
 
-  public function isComplete() {
-    return (bool) $this->_complete;
-  }
-
   public function getError() {
     return $this->_error;
+  }
+  
+  public function getDuration() {
+    return $this->_duration;
+  }
+  
+  public function getCalledId() {
+    return $this->_calledId;
+  }
+  
+  public function getConnectedDuration() {
+    return $this->_connectedDuration;
   }
 
   public function getUserType() {
