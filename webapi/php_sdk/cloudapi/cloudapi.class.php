@@ -19,29 +19,19 @@ class Cloudapi extends BaseClass {
 
   public function ask($ask, Array $params=NULL) {
     if(!is_object($ask)) {
-      $p = array('as','event','voice','attempts', 'bargein', 'minConfidence', 'name', 'required', 'timeout', 'allowSignals', 'recognizer', 'interdigitTimeout', 'sensitivity', 'speechCompleteTimeout', 'speechIncompleteTimeout','mode');
+      $p = array('terminator', 'as', 'event', 'voice', 'attempts', 'bargein', 'minConfidence', 'name', 'required', 'timeout', 'allowSignals', 'recognizer', 'interdigitTimeout', 'sensitivity', 'speechCompleteTimeout', 'speechIncompleteTimeout','mode');
       foreach ($p as $option) {
         $$option = null;
         if (is_array($params) && array_key_exists($option, $params)) {
           $$option = $params[$option];
         }
       }
-      if (is_array($ask)) {
-        // If an event was passed in, add the events to the Ask
-        foreach ($ask as $k){
-          $say[] = new Say($k['value'], $as, $e, $k['voice'],null,$k['attempts']);
-        }
-      }else{
-       $say[] = new Say($ask, $as, null, $voice,null,$attempts);
-      }
-      $params["mode"] = isset($params["mode"]) ? $params["mode"] : null;
-      $params["dtmf"] = isset($params["dtmf"]) ? $params["dtmf"] : null;
-      $params["terminator"] = isset($params["terminator"]) ? $params["terminator"] : null;
+      $say[] = new Say($ask, $as, null, $voice, null, null);
       if (!isset($voice) && isset($this->_voice)) {
         $voice = $this->_voice;
       }
-      $choices = isset($params["choices"]) ? new Choices($params["choices"], $params["mode"], $params["terminator"],$interdigitTimeout) : null;
-      $ask = new Ask($attempts, $bargein, $choices, $minConfidence, $name, $required, $say, $timeout, $voice, $allowSignals, $recognizer, $interdigitTimeout, $sensitivity, $speechCompleteTimeout, $speechIncompleteTimeout,$mode);
+      $choices = isset($params["choices"]) ? new Choices($params["choices"], $mode, $terminator, $interdigitTimeout) : null;
+      $ask = new Ask($attempts, $bargein, $choices, $minConfidence, $name, $required, $say, $timeout, $allowSignals, $recognizer, $sensitivity, $speechCompleteTimeout, $speechIncompleteTimeout);
     }
     $this->ask = sprintf('%s', $ask);
   }
@@ -55,11 +45,8 @@ class Cloudapi extends BaseClass {
           $$option = $params[$option];
         }
       }
-      
-      if(array_key_exists('say', $params)){
-     	  $say = new Say($say,$attempts,null,$voice);
-      }
-      $call = new Call($call, $from, $network, $channel, $answerOnMedia, $timeout, $headers, $recording, $allowSignals, $machineDetection, $voice,$name,$say);
+      $say = new Say($say, null, null, $voice, null, $attempts);
+      $call = new Call($call, $from, $network, $channel, $answerOnMedia, $timeout, $headers, $recording, $allowSignals, $machineDetection, null , $name, $say);
     }
     $this->call = sprintf('%s', $call);
   }
@@ -75,10 +62,8 @@ class Cloudapi extends BaseClass {
       }
       $id = (empty($id) && !empty($conference)) ? $conference : $id;
       $name = (empty($name)) ? (string)$id : $name;
-      
-      @$choices = new Choices($params["choices"], $params["mode"], $params["terminator"]);
-      
-      $conference = new Conference($name, $id, $mute, $on, $playTones, $required, $terminator, $allowSignals, $interdigitTimeout, $joinPrompt, $leavePrompt, $voice,$choices);
+      @$choices = new Choices((isset($params["choices"]) ? $params["choices"] : null), $mode, $terminator);
+      $conference = new Conference($name, $id, $mute, $on, $playTones, $required, $terminator, $allowSignals, $interdigitTimeout, $joinPrompt, $leavePrompt, $voice, $choices);
     }
     $this->conference = sprintf('%s', $conference);
   }
@@ -103,20 +88,16 @@ class Cloudapi extends BaseClass {
     }
     $this->message = sprintf('%s', $message);
   }
+
   public function on($on) {
     if (!is_object($on) && is_array($on))	{
       $params = $on;
-      if ((array_key_exists('say', $params) && ((array_key_exists('voice', $params) || isset($this->_voice))))){
-        $v = isset($params["voice"]) ? $params["voice"] : $this->_voice;
-        $say = new Say($params["say"], null, null, $v);
-      }else{
-        $say = (array_key_exists('say', $params)) ? new Say($params["say"]) : null;
-      }
       $next = (array_key_exists('next', $params)) ? $params["next"] : null;
-      $on = new On($params["event"], $next, $say);
+      $on = new On($params["event"], $next);
     }
     $this->on = array(sprintf('%s', $on));
   }
+
   public function record($record) {
     if(!is_object($record) && is_array($record)) {
       $params = $record;
@@ -124,20 +105,10 @@ class Cloudapi extends BaseClass {
       foreach ($p as $option) {
         $params[$option] = array_key_exists($option, $params) ? $params[$option] : null;
       }
-      $choices = isset($params["choices"])
-        ? new Choices(null, null, $params["choices"]) 
-        : null;
       $choices = isset($params["terminator"])
         ? new Choices(null, null, $params["terminator"]) 
         : $choices;
-      if (!isset($params['voice'])) {
-        $params['voice'] = $this->_voice;
-      }
-	  if (isset($params['say']) && isset($params['as'])) {
-		$say = new Say($params["say"], $params["as"], null, null);
-	  } else {
-		$say = null;
-	  }
+      $say = null;
       if (is_array($params['transcription'])) {
         $p = array('url', 'id', 'emailFormat');
         foreach ($p as $option) {
@@ -150,27 +121,29 @@ class Cloudapi extends BaseClass {
       } else {
         $transcription = $params["transcription"];
       }
-      $p = array('attempts', 'allowSignals', 'bargein', 'beep', 'format', 'maxTime', 'maxSilence', 'method', 'password', 'required', 'timeout', 'username', 'url', 'voice', 'minConfidence', 'interdigitTimeout');
+      $p = array('name', 'attempts', 'allowSignals', 'bargein', 'beep', 'format', 'maxTime', 'maxSilence', 'method', 'password', 'required', 'timeout', 'username', 'url', 'voice', 'minConfidence', 'interdigitTimeout');
       foreach ($p as $option) {
         $$option = null;
         if (is_array($params) && array_key_exists($option, $params)) {
           $$option = $params[$option];
         }
       }
-      $record = new Record($attempts, $allowSignals, $bargein, $beep, $choices, $format, $maxSilence, $maxTime, $method, $password, $required, $say, $timeout, $transcription, $username, $url, $voice, $minConfidence, $interdigitTimeout);
+      $record = new Record($name, $attempts, $allowSignals, $bargein, $beep, $choices, $format, $maxSilence, $maxTime, $method, $password, $required, $say, $timeout, $transcription, $username, $url, $voice, $minConfidence, $interdigitTimeout);
     }
     $this->record = sprintf('%s', $record);
   }
+
   public function redirect($redirect, Array $params=NULL) {
     if(!is_object($redirect)) {
       $to = isset($params["to"]) ? $params["to"]: null;
       $from = isset($params["from"]) ? $params["from"] : null;
       $name = isset($params["name"]) ? $params["name"] : null;
       $timeout = isset($params["timeout"]) ? $params["timeout"] : null;
-      $redirect = new Redirect($redirect, $from,$name,$timeout);
+      $redirect = new Redirect($redirect, $from, $name, $timeout);
     }
     $this->redirect = sprintf('%s', $redirect);
   }
+
   public function reject() {
     $reject = new Reject();
     $this->reject = sprintf('%s', $reject);
@@ -178,7 +151,7 @@ class Cloudapi extends BaseClass {
 
   public function say($say, Array $params=NULL) {
     if(!is_object($say)) {
-      $p = array('as', 'format', 'event','voice', 'allowSignals','attempts','name','terminator');
+      $p = array("required",'as', 'format', 'event','voice', 'allowSignals','attempts','name','terminator');
       $value = $say;
       foreach ($p as $option) {
         $$option = null;
@@ -187,7 +160,7 @@ class Cloudapi extends BaseClass {
         }
       }
       $voice = isset($voice) ? $voice : $this->_voice;
-      $say = new Say($value, $as, $event, $voice, $allowSignals,$attempts,$name,$terminator);
+      $say = new Say($value, $as, $event, $voice, $allowSignals, $attempts, $name, $terminator, $required);
     }
     $this->say = array(sprintf('%s', $say));
   }
@@ -201,7 +174,7 @@ class Cloudapi extends BaseClass {
           $$option = $params[$option];
         }
       }
-      $logcontent = new CloudLog($logcontent,$level);
+      $logcontent = new CloudLog($logcontent, $level);
     }
     $this->cloudlog = array(sprintf('%s', $logcontent));
   }
@@ -233,7 +206,7 @@ class Cloudapi extends BaseClass {
         ? new Choices(null, null, $params["terminator"]) 
         : $choices;
       $to = isset($params["to"]) ? $params["to"] : $transfer;
-      $p = array('answerOnMedia', 'ringRepeat', 'timeout', 'from', 'allowSignals', 'headers', 'machineDetection', 'voice','name');
+      $p = array('answerOnMedia', 'ringRepeat', 'timeout', 'from', 'allowSignals', 'headers', 'machineDetection', 'voice', 'name');
       foreach ($p as $option) {
         $$option = null;
         if (is_array($params) && array_key_exists($option, $params)) {
@@ -241,51 +214,7 @@ class Cloudapi extends BaseClass {
         }
       }
       $on = null;
-      if (array_key_exists('playvalue', $params) && isset($params['playvalue'])) {
-        $on = new On('ring', null, new Say($params['playvalue']));
-      } elseif (array_key_exists('on', $params) && isset($params['on'])) {
-        if (is_object($params['on'])) {
-          $on = $params['on'];
-        } else {
-          if (strtolower($params['on']['event']) == 'ring') {
-            $on = on(array('ring', null, new Say($params['on']['say']), null, null));
-          }elseif (strtolower($params['on']['event']) == 'connect') {
-
-            $comma = "";
-            $on = "";
-            
-            if(isset($params['on']['ring'])){
-              $on = new On('ring', null, new Say($params['on']['ring']), null, null);
-              $comma = ",";
-            }
-            foreach($params['on']['whisper'] as $key){
-              foreach($key as $k => $v){
-
-                switch($k){
-                  case 'ask':
-                  $on = $on . $comma . new On('connect', null, null, null,$v,null,null,"ask");
-                  break;
-                  case 'say':
-                  $on = $on . $comma . new On('connect', null, $v, null,null,null,null,"say");
-                  break;
-                  case 'wait':
-                  $on = $on . $comma . new On('connect', null, null, null,null,null,$v,"wait");
-                  break;
-                  case 'message':
-                  $on = $on . $comma . new On('connect', null, null, null,null,$v,null,"message");
-                  break;   
-                }
-                $comma = ",";
-              }
-            }
-
-          }else{
-            throw new CloudapiException("The only event allowed on transfer is 'ring' or 'connect'"); 
-          }
-        }
-      }
-      $on = $on == null ? null : sprintf('%s',$on);
-      $transfer = new Transfer($to, $answerOnMedia, $choices, $from, $ringRepeat, $timeout, $on, $allowSignals, $headers, $machineDetection, $voice,$name);
+      $transfer = new Transfer($to, $answerOnMedia, $choices, $from, $ringRepeat, $timeout, $on, $allowSignals, $headers, $machineDetection, $voice, $name);
     }
     $this->transfer = sprintf('%s', $transfer);
   }
@@ -444,27 +373,23 @@ class EmptyBaseClass {
 
 class Ask extends BaseClass {
 
-  private $_attempts;
-  private $_bargein;
-  private $_choices;
-  private $_minConfidence;
-  private $_name;
   private $_required;
+  private $_choices;
+  private $_bargein;
+  private $_minConfidence;
+  private $_name;  
   private $_say;
   private $_timeout;
-  private $_voice;
   private $_allowSignals;
   private $_recognizer;
-  private $_interdigitTimeout;
   private $_sensitivity;
   private $_speechCompleteTimeout;
   private $_speechIncompleteTimeout;
-  private $_mode;
+  private $_attempts;
 
   /**
   * Class constructor
   *
-  * @param int $attempts
   * @param boolean $bargein
   * @param Choices $choices
   * @param float $minConfidence
@@ -472,15 +397,16 @@ class Ask extends BaseClass {
   * @param boolean $required
   * @param Say $say
   * @param int $timeout
-  * @param string $voice
   * @param string|array $allowSignals
   * @param integer $interdigitTimeout
   * @param integer $sensitivity 
   * @param float $speechCompleteTimeout
   * @param float $speechIncompleteTimeout
   */
-  public function __construct($attempts=NULL, $bargein=NULL, Choices $choices=NULL, $minConfidence=NULL, $name=NULL, $required=NULL, $say=NULL, $timeout=NULL, $voice=NULL, $allowSignals=NULL, $recognizer=NULL, $interdigitTimeout=NULL, $sensitivity=NULL, $speechCompleteTimeout=NULL, $speechIncompleteTimeout=NULL,$mode=null) {
+  public function __construct($attempts=NULL, $bargein=NULL, Choices $choices=NULL, $minConfidence=NULL, $name=NULL, $required=NULL, $say=NULL, $timeout=NULL, $allowSignals=NULL, $recognizer=NULL, $sensitivity=NULL, $speechCompleteTimeout=NULL, $speechIncompleteTimeout=NULL) {
+
     $this->_attempts = $attempts;
+  	$this->_required=$required;
     $this->_bargein = $bargein;
     $this->_choices = isset($choices) ? sprintf('%s', $choices) : null ;
     $this->_minConfidence = $minConfidence;
@@ -488,14 +414,11 @@ class Ask extends BaseClass {
     $this->_required = $required;
     $this->_say = isset($say) ? $say : null;
     $this->_timeout = $timeout;
-    $this->_voice = $voice;
     $this->_allowSignals = $allowSignals;
     $this->_recognizer = $recognizer;
-    $this->_interdigitTimeout = $interdigitTimeout;
     $this->_sensitivity = $sensitivity;
     $this->_speechCompleteTimeout = $speechCompleteTimeout;
     $this->_speechIncompleteTimeout = $speechIncompleteTimeout;
-    $this->_mode = $mode;
   }
 
   /**
@@ -516,14 +439,11 @@ class Ask extends BaseClass {
       }
     }
     if(isset($this->_timeout)) { $this->timeout = $this->_timeout; }
-    if(isset($this->_voice)) { $this->voice = $this->_voice; }
     if(isset($this->_allowSignals)) { $this->allowSignals = $this->_allowSignals; }
     if(isset($this->_recognizer)) { $this->recognizer = $this->_recognizer; }
-    if(isset($this->_interdigitTimeout)) { $this->interdigitTimeout = $this->_interdigitTimeout; }
     if(isset($this->_sensitivity)) { $this->sensitivity = $this->_sensitivity; }
     if(isset($this->_speechCompleteTimeout)) { $this->speechCompleteTimeout = $this->_speechCompleteTimeout; }
     if(isset($this->_speechIncompleteTimeout)) { $this->speechIncompleteTimeout = $this->_speechIncompleteTimeout; }
-    if(isset($this->_mode)) { $this->mode = $this->_mode; }
     return $this->unescapeJSON(json_encode($this));
   }
 
@@ -568,7 +488,7 @@ class Call extends BaseClass {
   * @param StartRecording $recording
   * @param string|array $allowSignals
   */
-  public function __construct($to, $from=NULL, $network=NULL, $channel=NULL, $answerOnMedia=NULL, $timeout=NULL, Array $headers=NULL, StartRecording $recording=NULL, $allowSignals=NULL, $machineDetection=NULL, $voice=NULL,$name=NULL,$say=NULL) {
+  public function __construct($to, $from=NULL, $network=NULL, $channel=NULL, $answerOnMedia=NULL, $timeout=NULL, Array $headers=NULL, StartRecording $recording=NULL, $allowSignals=NULL, $machineDetection=NULL, $voice=NULL, $name=NULL, Say $say=NULL) {
     $this->_to = $to;
     $this->_from = $from;
     $this->_network = $network;
@@ -679,7 +599,7 @@ class Conference extends BaseClass {
   * @param string|array $allowSignals
   * @param int $interdigitTimeout
   */
-  public function __construct($name, $id=NULL, $mute=NULL, On $on=NULL, $playTones=NULL, $required=NULL, $terminator=NULL, $allowSignals=NULL, $interdigitTimeout=NULL, $joinPrompt=NULL, $leavePrompt=NULL, $voice=NULL,$choices=null) {
+  public function __construct($name, $id=NULL, $mute=NULL, On $on=NULL, $playTones=NULL, $required=NULL, $terminator=NULL, $allowSignals=NULL, $interdigitTimeout=NULL, $joinPrompt=NULL, $leavePrompt=NULL, $voice=NULL, Choices $choices=null) {
     $this->_name = $name;
     $this->_id = (string) $id;
     $this->_mute = $mute;
@@ -893,7 +813,8 @@ class Record extends BaseClass {
   * @param int $minConfidence
   * @param int $interdigitTimeout
   */
-  public function __construct($attempts=NULL, $allowSignals=NULL, $bargein=NULL, $beep=NULL, Choices $choices=NULL, $format=NULL, $maxSilence=NULL, $maxTime=NULL, $method=NULL, $password=NULL, $required=NULL, $say=NULL, $timeout=NULL, Transcription $transcription=NULL, $username=NULL, $url=NULL, $voice=NULL, $minConfidence=NULL, $interdigitTimeout=NULL) {
+  public function __construct($name=NULL,$attempts=NULL, $allowSignals=NULL, $bargein=NULL, $beep=NULL, Choices $choices=NULL, $format=NULL, $maxSilence=NULL, $maxTime=NULL, $method=NULL, $password=NULL, $required=NULL, $say=NULL, $timeout=NULL, Transcription $transcription=NULL, $username=NULL, $url=NULL, $voice=NULL, $minConfidence=NULL, $interdigitTimeout=NULL) {
+  	$this->_name=$name;
     $this->_attempts = $attempts;
     $this->_allowSignals = $allowSignals;
     $this->_bargein = $bargein;
@@ -1020,15 +941,15 @@ class Result {
       throw new CloudapiException('Not a result object.');
     }
     $this->_sessionId = $result->result->sessionId;
-    $this->_state = $result->result->state;
-    $this->_sessionDuration = $result->result->sessionDuration;
-    $this->_sequence = $result->result->sequence;
-    $this->_error = $result->result->error;
-    $this->_calledId = $result->result->CalledID;
-    $this->_duration = $result->result->duration;
-    $this->_connectedDuration = $result->result->connectedDuration;
+    $this->_state = isset($result->result->state)?$result->result->state:null;
+    $this->_sessionDuration = isset($result->result->sessionDuration)?$result->result->sessionDuration:null;
+    $this->_sequence = isset($result->result->sequence)?$result->result->sequence:null;
+    $this->_error = isset($result->result->error)?$result->result->error:null;
+    $this->_calledId = isset($result->result->CalledID)?$result->result->CalledID:null;
+    $this->_duration = isset($result->result->duration)?$result->result->duration:null;
+    $this->_connectedDuration = isset($result->result->connectedDuration)?$result->result->connectedDuration:null;
     $this->_userType = isset($result->result->userType)?$result->result->userType:null;
-    $this->_actions = $result->result->actions;
+    $this->_actions = isset($result->result->actions)?$result->result->actions:null;
     $this->_name = isset($result->result->actions->name)?$result->result->actions->name:null;
     $this->_attempts = isset($result->result->actions->attempts)?$result->result->actions->attempts:null;
     $this->_disposition = isset($result->result->actions->disposition)?$result->result->actions->disposition:null;
@@ -1128,6 +1049,7 @@ class Say extends BaseClass {
   private $_attempts;
   private $_name;
   private $_terminator;
+  private $_required;
 
   /**
   * Class constructor
@@ -1138,7 +1060,8 @@ class Say extends BaseClass {
   * @param string $voice
   * @param string|array $allowSignals
   */
-  public function __construct($value, $as=NULL, $event=NULL, $voice=NULL, $allowSignals=NULL,$attempts=NULL,$name=NULL, $terminator=NULL) {
+  public function __construct($value, $as=NULL, $event=NULL, $voice=NULL, $allowSignals=NULL, $attempts=NULL, $name=NULL, $terminator=NULL, $required=NULL) {
+  	$this->_required=$required;
     $this->_value = $value;
     $this->_as = $as;
     $this->_event = $event;
@@ -1162,6 +1085,7 @@ class Say extends BaseClass {
     if(isset($this->_attempts)) { $this->attempts = $this->_attempts; }
     if(isset($this->_name)) { $this->name = $this->_name; }
     if(isset($this->_terminator)) { $this->terminator = $this->_terminator; }
+    if(isset($this->_required)) { $this->required = $this->_required; }
     return $this->unescapeJSON(json_encode($this));
   }
 }
