@@ -105,9 +105,7 @@ class Cloudapi extends BaseClass {
       foreach ($p as $option) {
         $params[$option] = array_key_exists($option, $params) ? $params[$option] : null;
       }
-      $choices = isset($params["terminator"])
-        ? new Choices(null, null, $params["terminator"]) 
-        : $choices;
+      $choices = isset($params["terminator"]) ? new Choices(null, null, $params["terminator"]) : null;
       $say = null;
       if (is_array($params['transcription'])) {
         $p = array('url', 'id', 'emailFormat');
